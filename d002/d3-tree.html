@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Dagre D3 Demo: DOM Example</title>
+		<script src="https://d3js.org/d3.v4.min.js" charset="utf-8"></script>
+		<style >
+			.micro-topo-chart {
+				height: 800px;
+				width: 100%;
+			}
+				.node-name {
+					cursor: move;
+					font-size: 14px;
+					fill: #f00;
+				}
+
+				.link {
+					stroke-linecap: round;
+					stroke-width: 1.3px;
+					fill: none;
+					/* animation: dash 1s linear infinite; */
+				}
+
+				@keyframes dash {
+					from {
+						stroke-dashoffset: 20;
+					}
+
+					to {
+						stroke-dashoffset: 0;
+					}
+				}
+
+				.node-text {
+					font-family: "Lato", "Source Han Sans CN", "Microsoft YaHei", sans-serif;
+					fill: #f00;
+					font-size: 11px;
+					opacity: 0.8;
+				}
+
+				.link-text {
+					font-family: "Lato", "Source Han Sans CN", "Microsoft YaHei", sans-serif;
+					fill: #FFAAAA;
+					font-size: 11px;
+					opacity: 0.8;
+				}
+
+				.node {
+					cursor: move;
+					fill: #333840;
+					stroke-width: 0;
+				}
+
+				.link-node {
+					stroke-width: 6px;
+					stroke: rgba(255, 0, 255, 0);
+				}
+
+		</style>
+
+	</head>
+	<body>
+		<h2>字母可拖拽</h2>
+		<div id="box" class="micro-topo-chart"></div>
+		<script >
+
+			var nodes = [
+				{"id":1,"name":"A"},
+				{"id":2,"name":"B"},
+				{"id":3,"name":"C"},
+				{"id":4,"name":"D"},
+				{"id":5,"name":"E"},
+				{"id":6,"name":"F"},
+				{"id":7,"name":"G"},
+				{"id":8,"name":"H"},
+				{"id":9,"name":"I"},
+				{"id":10,"name":"J"},
+				]
+			var links = [
+				{"source":1,"target":2},
+				{"source":1,"target":5},
+				{"source":1,"target":6},
+				{"source":2,"target":3},
+				{"source":2,"target":7},
+				{"source":3,"target":4},
+				{"source":8,"target":3},
+				{"source":4,"target":5},
+				{"source":4,"target":9},
+				{"source":5,"target":10}
+				];
+
+			//生成画布
+			var svg = d3.select('div').append('svg').style('display', 'block').attr('width', '100%').attr('height', "800px");
+			var graph = svg.append('g').attr('class', 'graph');
+			
+			//自动布局设置
+			var simulation = d3.forceSimulation(nodes)
+				// .force('collide', d3.forceCollide().radius(() => 65))
+					// .force('yPos', d3.forceY().strength(1))
+					// .force('xPos', d3.forceX().strength(1))
+				.force('charge', d3.forceManyBody().strength(-520))
+				.force('link', d3.forceLink(links).id(d => d.id))
+				.force('center', d3.forceCenter(window.innerWidth / 2 + 100, 800 / 2))
+				.on('tick', tick) //拖拽的关键代码1
+				.stop();	
+				   
+			 //滚动缩放
+			svg.call(getZoomBehavior(graph))
+
+			//节点设置
+			var gnode = graph.append('g').selectAll('.node');
+			var node = gnode.data(nodes)
+					   .enter()
+					   .append('g')
+					   .call(d3.drag().on('start', dragstart).on('drag', dragged)) //拖拽的关键代码2
+			node.append('text')
+				.attr('class', 'node-text')
+				.attr('text-anchor', 'middle')
+				.text(d =>  d.name)
+				
+			//线条设置	
+			var glink = graph.append('g').selectAll('.link');
+			var link = glink.data(links).enter();	
+			var line = link.append('path')
+					 .attr('class', 'link')
+					 .attr('stroke','#000');
+
+				 //拖拽的关键代码3
+					for (let i = 0,n = Math.ceil(Math.log(simulation.alphaMin()) /Math.log(1 - simulation.alphaDecay())); i < n; i++) {
+						simulation.tick();
+						tick();
+					}	
+				 
+				   
+		  //拖拽的关键代码4
+			function tick() {
+				line.attr('d', d =>`M${d.source.x} ${d.source.y} Q ${(d.source.x + d.target.x)/2} ${(d.target.y + d.source.y)/2 - 80} ${d.target.x} ${d.target.y}`);
+				// lineNode.attr('transform', d =>`translate(${(d.source.x + d.target.x)/2 - 3},${(d.target.y + d.source.y)/2 - 43})`);
+				// linkText.attr('transform',d =>`translate(${(d.source.x + d.target.x) / 2},${(d.source.y + d.target.y) / 2})`);
+				node.attr('transform', d => `translate(${d.x },${d.y})`);
+			}
+			//缩放功能
+			function getZoomBehavior(g) {
+				return d3.zoom().scaleExtent([0.3, 10])
+					.on('zoom', () => {
+						g.attr('transform',`translate(${d3.event.transform.x},${d3.event.transform.y})scale(${ d3.event.transform.k})`);
+					});
+			}	
+			 //以下是拖拽的关键代码5
+			function dragstart(d) {
+
+				node._groups[0].forEach(d => {
+					d.__data__.fx = d.__data__.x;
+					d.__data__.fy = d.__data__.y;
+				});
+				if (!d3.event.active) {
+					simulation.alphaTarget(1).restart();
+				}
+				d3.event.sourceEvent.stopPropagation(); 
+			}
+			function dragged(d) {
+				d.fx = d3.event.x;
+				d.fy = d3.event.y;
+			}
+			function ended(d){
+					if(!d3.event.active){
+						forceSimulation.alphaTarget(0);
+					}
+					d.fx = null;
+					d.fy = null;
+				}
+
+			
+		</script>
+
+	</body>
+</html>
