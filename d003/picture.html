@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>画廊</title>
+		<meta name="Description" content="设计模式"/>
+		<style type="text/css">
+			.wraper{
+				position:relative;
+				width:1000px;
+				height:400px;
+			}
+			#mydiv{
+				position:absolute;
+				/* right:0; */
+			}
+		</style>
+	</head>
+	<body>
+		<div id="imgcontent">
+
+		</div>
+		
+	</body>
+	
+	<script type="text/javascript">
+		//命令模式
+		function Picture(commander){
+			this.html = "";
+			this.render(commander);
+		}
+		Picture.prototype.initData=function(commander){
+			//各大框架里面都有使用得东西-与默认指令合并
+			//第一:有些指令不需要用户输入
+			//第二:防止漏输入
+			var final = {};
+			var defaultCommander={
+				data:[],
+				id:document,
+				way:'normal',
+				size:[100,100]
+			}
+			for(var item in defaultCommander){
+				if(commander[item]){
+					final[item] = commander[item];
+					if(item == 'id'){
+						final.id = document.getElementById(commander.id);
+					}
+				}else{
+					final[item]=defaultCommander[item];
+				}
+			}
+			return final;
+		}
+		Picture.prototype.initDom=function(commander){
+			var styleArr = [{
+				float:'left',
+				width:commander.size[0]+"px",
+				height:commander.size[1]+"px",
+				position:'relative'
+			},{
+				position:'absolute',
+				bottom:'0px',
+				right:'0px',
+				backgroundColor:'black',
+				color:'white',
+				padding:'10px'
+				
+			},{
+				width:"100%",
+				height:'100%'
+			}]
+			var wraper = document.createElement('div')
+			var commanderHandle= {
+				normal:function(arr){
+					return arr;
+				},
+				inverted:function(arr){
+					return arr.reverse();
+				}
+			}
+			var _data = commanderHandle[commander.way](commander.data);
+			 _data.forEach((url,numer)=>{
+				var div = document.createElement('div')
+				var img = document.createElement('img')
+				var span = document.createElement('span')
+				var handleDom = null;
+				styleArr.forEach((styler,index)=>{
+					switch(index){
+						case 0:
+						handleDom = div;
+						break;
+						case 1:
+						handleDom = span;
+						break;
+						case 2:
+						handleDom = img;
+						break;
+					}
+					for(var stylename in styler){
+						handleDom.style[stylename]= styler[stylename];
+					}
+				})
+				img.setAttribute('src',url);
+				div.appendChild(img);
+				span.innerHTML = numer + 1;
+				div.appendChild(span);
+				wraper.appendChild(div);
+			}) 
+			this.html = wraper;
+		}
+		Picture.prototype.renderDom=function(dom){
+			dom.appendChild(this.html)
+		}
+		Picture.prototype.render=function(commander){
+			var order = this.initData(commander)
+			this.initDom(order)
+			this.renderDom(order.id)
+		}
+		new Picture({
+			data:['xx','yyy','aaa','bbb'],
+			size:[200,200],
+			way:'inverted',
+			id:'imgcontent'
+		})
+	
+	</script>
+</html>

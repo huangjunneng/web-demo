@@ -12,7 +12,7 @@
 			}
 			#mydiv{
 				position:absolute;
-				left:0;
+				/* left:0; */
 			}
 		</style>
 	</head>
@@ -68,12 +68,10 @@
 		var DataMangerOb = new DataManger();
 		var input =  document.getElementById("num");
 		document.getElementById('toleft').onclick = function(){
-			debugger;
 			DataMangerOb.pushState({property:'left',num:-input.value})
 			changeDiv(DataMangerOb)
 		}
 		document.getElementById('toright').onclick = function(){
-			debugger;
 			DataMangerOb.pushState({property:'left',num:input.value})
 			changeDiv(DataMangerOb)
 		}
