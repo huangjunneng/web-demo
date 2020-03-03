@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>前进后退</title>
+		<meta name="Description" content="设计模式"/>
+		<style type="text/css">
+			.wraper{
+				position:relative;
+				width:1000px;
+				height:400px;
+			}
+			#mydiv{
+				position:absolute;
+				left:0;
+			}
+		</style>
+	</head>
+	<body>
+		<div>
+			<button type="button" id="toleft">左移动</button>
+			<input type="text" id="num">
+			<button type="button" id="toright">右移动</button>
+		</div>
+		<div class="wraper">
+			<div id="mydiv">this is dev</div>
+		</div>
+		<div>
+			<button type="button" id="back">后退</button>
+			<button type="button" id="font">前进</button>
+		</div>
+	</body>
+	
+	<script type="text/javascript">
+		//数据驱动
+		//模块设计 (操作指令输入模块-操作div模块-撤销和前进模块——状态管理模块)
+		//低耦合模块
+		var dom = document.getElementById("mydiv");
+		function changeDiv(dataob){
+			if(!dataob instanceof DataManger){
+				throw new Error("dataob  必须是一个datamanger的实例！");
+			}
+			var _data = dataob.getData();
+			dom.style[_data.property] = _data.num+ "px";
+			
+		}
+		function DataManger(){
+			this.stateArr=[{property:"left",num:0}],
+			this.nowstate= 0;
+		}
+		DataManger.prototype.pushState=function(data){
+			this.stateArr.push(data);
+			this.nowstate = this.stateArr.length-1;
+		}
+		DataManger.prototype.getBack=function(data){
+			if(this.nowstate>0){
+				this.nowstate--;
+			}
+		}
+		DataManger.prototype.getFont=function(data){
+			if(this.nowstate< this.stateArr.length-1){
+				this.nowstate++;
+			}
+		}
+		DataManger.prototype.getData=function(data){
+			return this.stateArr[this.nowstate];
+		}
+		var DataMangerOb = new DataManger();
+		var input =  document.getElementById("num");
+		document.getElementById('toleft').onclick = function(){
+			debugger;
+			DataMangerOb.pushState({property:'left',num:-input.value})
+			changeDiv(DataMangerOb)
+		}
+		document.getElementById('toright').onclick = function(){
+			debugger;
+			DataMangerOb.pushState({property:'left',num:input.value})
+			changeDiv(DataMangerOb)
+		}
+		document.getElementById('back').onclick = function(){
+			DataMangerOb.getBack()
+			changeDiv(DataMangerOb)
+		}
+		document.getElementById('font').onclick = function(){
+			DataMangerOb.getFont()
+			changeDiv(DataMangerOb)
+		}
+	</script>
+</html>

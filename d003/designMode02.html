@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>前进后退</title>
+		<meta name="Description" content="设计模式"/>
+		<style type="text/css">
+			.wraper{
+				position:relative;
+				width:1000px;
+				height:400px;
+			}
+			#mydiv{
+				position:absolute;
+				/* right:0; */
+			}
+		</style>
+	</head>
+	<body>
+		<div>
+			<button type="button" id="toleft">左移动</button>
+			<input type="text" id="num">
+			<button type="button" id="toright">右移动</button>
+		</div>
+		<div class="wraper">
+			<div id="mydiv">this is dev</div>
+		</div>
+		<div>
+			<button type="button" id="back">后退</button>
+			<button type="button" id="font">前进</button>
+		</div>
+	</body>
+	
+	<script type="text/javascript">
+		//命令模式
+		/** 
+			定义：把具体的指令与实现相隔离，对调用与执行解耦
+			做法：将方法、数据都分装到单一的对象中，对调用方与执行方进行解耦，达到职责分离的目的。
+			解决的问题：降低调用部分与执行部分的耦合，让使用的时候只需关心指令，而不需要关心具体的api
+
+		 **/
+		 var handleDiv = (function(){
+			 //
+			 var dom = document.getElementById("mydiv");
+			 function changeDiv(dataob){
+			 	if(!dataob instanceof DataManger){
+			 		throw new Error("dataob  必须是一个datamanger的实例！");
+			 	}
+			 	var _data = dataob.getData();
+			 	dom.style[_data.property] = _data.num;
+			 	
+			 }
+			 function DataManger(){
+			 	this.stateArr=[{property:"left",num:0}],
+			 	this.nowstate= 0;
+			 }
+			 DataManger.prototype.pushState=function(data){
+			 	this.stateArr.push(data);
+			 	this.nowstate = this.stateArr.length-1;
+			 }
+			 DataManger.prototype.getBack=function(data){
+			 	if(this.nowstate>0){
+			 		this.nowstate--;
+			 	}
+			 }
+			 DataManger.prototype.getFont=function(data){
+			 	if(this.nowstate< this.stateArr.length-1){
+			 		this.nowstate++;
+			 	}
+			 }
+			 DataManger.prototype.getData=function(data){
+			 	return this.stateArr[this.nowstate];
+			 }
+			 var DataMangerOb = new DataManger();
+			 
+			 return {
+				 excute:function(commander){
+					 var commanderArr = ['back','font'];
+					 if(typeof commander === "object"){
+						 DataMangerOb.pushState(commander);
+						 changeDiv(DataMangerOb)
+					 }else{
+						 var has = false;
+						 if(commanderArr.indexOf(commander) != -1){
+							 has = true;
+							 //策略模式
+							 var state={
+								 font:function(){
+									 DataMangerOb.getFont()
+									 changeDiv(DataMangerOb)
+								 },
+								 back:function(){
+									 DataMangerOb.getBack()
+									 changeDiv(DataMangerOb)
+								 },
+								 any:function(){
+									 
+								 }
+							 }
+							 state[commander]();
+							 //以下是lowB写法
+							 // if(commander == 'font'){
+								//  
+							 // }else if(commander=='back'){
+								//  
+							 // }else if(){}
+							 
+						 }else{
+							 throw new Error('命令不符合规范')
+						 }
+					 }
+				 }
+			 }
+		 })()
+		 
+		 var input =  document.getElementById("num");
+		 document.getElementById('toleft').onclick = function(){
+		 	handleDiv.excute({property:'left',num:input.value+"px"})
+		 }
+		 document.getElementById('toright').onclick = function(){
+		 	handleDiv.excute({property:'left',num:-input.value+"px"})
+		 }
+		 document.getElementById('back').onclick = function(){
+		 	handleDiv.excute("back")
+		 }
+		 document.getElementById('font').onclick = function(){
+		 	handleDiv.excute("font")
+		 }
+	</script>
+</html>
