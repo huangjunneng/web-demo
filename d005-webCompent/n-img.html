@@ -1,0 +1,22 @@
+
+<script>
+  class Nimg extends HTMLImageElement {
+    static get TAG_NAME() {
+      return 'n-img';
+    };
+
+    constructor() {
+      super();
+      console.log("这里扩展了img组件")
+      this.width=100
+      setTimeout(() => {
+			
+			this.width=300
+			this.src = './img/bg_03.png';
+		}, 2000);
+  
+    }
+  }
+  //扩展原生标签
+  customElements.define(Nimg.TAG_NAME,Nimg, { extends: "img" });
+</script>
