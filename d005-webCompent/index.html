@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+		<title>webCompent</title>
+       <link rel="import" href="./n-com.html">
+        <link rel="import" href="./n-img.html">
+        <style>
+            #box{
+                background:blue ;
+                color:aliceblue;
+            }
+        </style>
+		
+	</head>
+	<body>
+       <div id='box' onclick="aa()">我是ID=box的div</div>
+        <n-com attr-name="你点我干嘛"  ></n-com>
+        <my-img ></my-img>
+        <img is="n-img" src="./img/bg_06.png" alt="">
+	    <my-com data-test='aosd' title='这里是自定义的标题' content='这里是我们自定义的内容'>
+		    <span>内嵌</span>
+		</my-com>
+    </body>
+	<script src='./dialog.js' type='module'></script>
+    <script>
+		// 监听组件内部自定义事件
+         document.addEventListener('buttonclick', (e) => {
+            console.log(e.detail)
+        });
+		let aa =  function(){
+		    console.log("aa1")
+		}
+    </script>
+</html>

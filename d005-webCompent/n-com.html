@@ -1,0 +1,55 @@
+<template>
+<div>
+	 <style>
+    #box{
+      color:red;
+    }
+   </style>
+	<div id="box">我是n-com组件！</div>
+	<button>组件事件</button>
+</div>
+
+</template>
+<script>
+	//获取模板自身的根节点
+  const componentDocument = document.currentScript.ownerDocument;
+
+  class Component extends HTMLElement {
+
+    static get TAG_NAME() {
+      return 'n-com';
+    };
+	static get BUTTON_CLICK() {
+      return 'buttonclick';
+    }
+
+    constructor() {
+      super();
+      const shadow = this.attachShadow({ mode: 'closed' });
+      const content = componentDocument.querySelector('template').content.cloneNode(true);
+      shadow.appendChild(content);
+      const button = shadow.querySelector('button');
+      const attrValue = this.getAttribute('attr-name');
+	    let attr = this.attributes;
+	    console.log(attr.attr-name.vlaue)
+	    button.addEventListener('click', () => {
+        document.dispatchEvent(new CustomEvent('buttonclick', { detail:{attrValue} }));
+      });
+    }
+    connectedCallback(){
+      console.log("组件挂载，组件初始化后和移动时会触发");
+    }
+    disconnectedCallback (){
+      console.log("组件卸载");
+    }
+    adoptedCallback(){
+      console.log("组件被移动到一个新的文档树");
+    }
+    attributeChangedCallback(){
+      console.log("组件属性变化");
+    }
+	
+  }
+
+  customElements.define(Component.TAG_NAME, Component);
+</script>
